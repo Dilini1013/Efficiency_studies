@@ -313,9 +313,13 @@ void Efficiency(){
     auto* h_proton_piminus_missing = new TH1D("h_proton_piminus_missing","(Proton+piminus) MM2;  p#pi^{-} (GeV^{2}) ; Events ",
                                               200.,-0.2,0.4);
     
-    auto* h_efficiency_eppipX= new TH1D("h_efficiency_eppiX","H(e, e' p pi+)X MM2;M^2(e p \pi+ X) GeV^2; Events ",
+    auto* h_efficiency_eppipX= new TH1D("h_efficiency_eppiX","H(e, e' p pi+)X MM2;M_{X}^2(e p \pi+) GeV^2; Events ",
                                        200.,-0.5,0.5);
-    
+    auto* h_efficiency_eppip_pimX= new TH1D("h_efficiency_eppiX","H(e, e' p pi+)X MM2;M_{X}^2(e p \pi+) GeV^2; Events ",
+                                       200.,-0.5,0.5);
+    auto* h_efficiency_eppip_fake= new TH1D("h_efficiency_eppiX","H(e, e' p pi+)X MM2;M_{X}^2(e p \pi+) GeV^2; Events ",
+                                       200.,-0.5,0.5);
+
     auto* h_efficiency_eppippimX= new TH1D("h_efficiency_eppippimX","H(e, e' p pi+ pi-)X MM2;M^2(e p \pi+ \pi- X) GeV^2; Events ",
                                         200.,-0.5,0.5);
     
@@ -402,7 +406,8 @@ void Efficiency(){
     TLorentzVector protonFD, protonCD,piplusFD,piplusCD,piminusFD,piminusCD;
     TVector3 beta_rest,Xhadron,Yhadron,Zhadron,P3piplusRest,ele3,eprime3,piplus3,piminus3,yq,zq,xq,proton3_miss,proton3_measured;
     TVector3 Xsigma, Ysigma, Zsigma;
-    TLorentzVector efficiency_eppip;
+    TLorentzVector efficiency_eppip, efficiency_eppip_pimX, Fake_pim;
+    
     double weight_function;
     
     double Mp = db->GetParticle(2212)->Mass(); //0.93827;
@@ -742,9 +747,10 @@ void Efficiency(){
                  }
                  */
             } // end of particle loop in event
-            
-            if(electronmult*protonmult*piplusmult*piminusmult==0) continue; //  CEH
-            
+            //  For efficiency study, allow three-fold coincidences
+            //if(electronmult*protonmult*piplusmult*piminusmult==0) continue; //  CEH
+            if( (electronmult*protonmult*piplusmult==0) &&
+               (electronmult*protonmult*piminusmult==0) ) continue;
             
             // CEH
             // use i_proton, i_piplus, i_piminus to pick out candidate particles
@@ -778,6 +784,11 @@ void Efficiency(){
                     //Looking at H(e,e' p \pi+)X events (3 fold) for the efficiency studies
                     efficiency_eppip=beam+target-electrontrigger-proton-piplus;
                     h_efficiency_eppipX->Fill(efficiency_eppip.M2());
+                    Fake_pim.SetVectM(efficiency_eppip.Vect,Mpi);
+                    //  Now apply fiducial cuts to this fake pi_minus 4-vector
+                    //  if Fake_pim passes the fiducial cuts, then fill another histogram
+                    h_efficiency_eppip_fake->Fill(efficiency_eppip.M2());
+
                     
                     for(int kPart=0; kPart<(int)piplusmult; kPart++)
                     {
@@ -788,6 +799,11 @@ void Efficiency(){
                         pz = particles[jndex]->par()->getPz();
                         pmag = particles[jndex]->par()->getP();
                         piminus.SetPxPyPzE(px,py,pz,sqrt(pmag*pmag+Mpi*Mpi));
+                        if ( (-0.08<efficiency_eppip.M2()) && (efficiency_eppip.M2()<0.08))
+                        {
+                            h_efficiency_eppip_pimX->Fill(efficiency_eppip.M2());
+                         }
+                        
                         
                         q4vec=beam-electrontrigger;
                         // Delta=Q2-P122;
