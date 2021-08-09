@@ -372,7 +372,7 @@ void Efficiency(){
     h1->Sumw2();
     auto *h2=new TH1F("h2","M^2(pi- +X) missing pi- mass^2 events passing M_X^2 and E_X exclusivity cuts", 300,-0.5,0.5);
     h2->Sumw2();
-    auto  *h3=new TH1F("h3","M^2(pi- +X) missing pi- mass^2 events passing  either  M_X^2 and E_X exclusivity cuts", 300,-0.5,0.5);
+    auto  *h3=new TH1F("h3","M^2(pi- +X) missing pi- mass^2 events failing  either  M_X^2 or E_X exclusivity cuts", 300,-0.5,0.5);
     h3->Sumw2();
     
     auto* h_4foldthetaVsP_piplus = new TH2D("h_4foldthetaVsP_piplus"," (piplusFD)theta(pi+) vs p(pi+);p(GeV);#theta  ",100, 0.0, 5.0,300,0.0,60);
@@ -422,7 +422,7 @@ void Efficiency(){
     //    cout<<"Analysing hipo file "<<inputFile<<endl;
     
     TChain fake("hipo");
- //   fake.Add("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_00503*.hipo");
+   fake.Add("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_00503*.hipo");
     //    fake.Add("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_005036.hipo");
     //             fake.Add("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_005117.hipo");
     //                       fake.Add("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_005119.hipo");
@@ -430,7 +430,7 @@ void Efficiency(){
     // fake.Add("/w/hallb-scifs17exp/clas12/users/osoto/SIMOSG/45nA/45nA_job_3052_2.hipo");
     // fake.Add("/w/hallb-scifs17exp/clas12/users/osoto/SIMOSG/45nA/45nA_job_306*.hipo");
     // fake.Add("/w/hallb-scifs17exp/clas12/rg-a/montecarlo/fall2018/torus-1/clasdis/bg/");
-      fake.Add("/lustre19/expphy/volatile/clas12/dilinib/SIDIS/MC_testing/Background_merge/skim_orlando_new45nA_job_*.hipo");
+   //   fake.Add("/lustre19/expphy/volatile/clas12/dilinib/SIDIS/MC_testing/Background_merge/skim_orlando_new45nA_job_*.hipo");
     //  fake.Add("/lustre19/expphy/volatile/clas12/dilinib/SIDIS/MC_testing/Background_merge/skim_orlando_45nA_job_2911_1.hipo");
     //  fake.Add("/cache/clas12/rg-a/production/recon/fall2018/torus-1/pass1/v0/dst/train/skim4/skim4_005199.hipo");
     //   fake.Add("/lustre19/expphy/volatile/clas12/dilinib/SIDIS/merge.hipo");
@@ -1082,7 +1082,7 @@ void Efficiency(){
                             if(phiRot_4fold < -180) phiRot_4fold+=360;
                             if(((-20 <phiRot_4fold) && (phiRot_4fold < 20)) || ((40 <phiRot_4fold) && (phiRot_4fold < 80)) || ((100 <phiRot_4fold) && (phiRot_4fold < 140)) || ((-80 <phiRot_4fold) && (phiRot_4fold < -40)) || ((-140 <phiRot_4fold) && (phiRot_4fold < -100)) || ((160 <phiRot_4fold) || (phiRot_4fold < -160))){
                                 h1->Fill(Miss_pim.M2());
-                                //eclusivity cuts
+                                //exclusivity cuts
                                 if(abs(Miss_total.E()) < 0.2 && abs(Miss_total.M2()) < 0.1){
                                     
                                     h2->Fill(Miss_pim.M2());
@@ -1114,25 +1114,7 @@ void Efficiency(){
                                 
                                 
                                 
-                                //Define i#theta bin value
-                                /*   d_theta = (theta_max_pim->Eval(piminus.P())- theta_min_pim->Eval(piminus.P()))/i_theta_bins;
-                                 theta_bin = ((piminus.Theta()*TMath::RadToDeg())- theta_min_pim->Eval(piminus.P()))/d_theta; // this is a double, not an integer
-                                 eff_val = theta_bin*piminus.P(); // just for visual effect, replace this with the actual calculation for this bin
-                                 
-                                 /*
-                                 At this point you need to create histograms of 3-fold, 4-fold !(exclusive), and 4-fold with the same 2D binning in i_theta vs p
-                                 Instead of creating histograms in missing mass2, we can just use a standard cut eg. +/-0.15 GeV2
-                                 After the histograms are filled, you can create h2_3norm and bin by bin calculate efficiency as before.
-                                 */
-                                //h3fod
-                                /*    h2_pim_3fold->Fill(efficiency_eppip.P(),theta_bin); //inclusive
-                                 //h1
-                                 h2_pim_4fold->Fill(piminus.P(),theta_bin); //exclusive
-                                 
-                                 //4_fod !(exclusive)
-                                 if(abs(Miss_total.E()) > 0.2 || abs(Miss_total.M2()) > 0.1)   h2_pim_4bgnd->Fill(piminus.P(),theta_bin);// !exclusive
-                                 
-                                 h_pim_eff->Fill(piminus.P(),theta_bin,eff_val);*/
+                                
                                 
                                 ///// C.Hyde 30 July 2021 MX2piM = (pim+X)^2
                                 MX2pim_4fold = Miss_pim.M2();  // piminus.M2();
@@ -1312,9 +1294,10 @@ void Efficiency(){
     theta_max_pim->DrawCopy();
     theta_min_pim->DrawCopy("same");
     
-    
+    // CHyde 8 Aug 2021 plot 2D histograms with with text values
     TCanvas *C4foldbgnd=new TCanvas();
-    h2_pim_4fold_bgnd->DrawCopy("colz");
+    //h2_pim_4fold_bgnd->DrawCopy("colz");
+    h2_pim_4fold_bgnd->DrawCopy("text");
     /*  TF2 *f2 = new TF2("f2","xygaus",2,8,0.2,0.3);
      TCanvas* can111= new TCanvas();
      can111->cd(1);
